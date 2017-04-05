@@ -1,0 +1,123 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+  <style>
+  body {
+    shape-rendering: crispEdges;
+  }
+  .axis {
+    fill: none;
+    color: grey;
+    stroke-width: 0.5;
+  }
+  </style>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script type="text/javascript">
+  function draw(data) {
+    'use strict';
+    var margin = 75,
+        height = 600 - margin,
+        width = 1400 - margin,
+        radius = 3;
+
+    var svg = d3.select('body')
+                .append('svg')
+                .attr('height', (height + margin))
+                .attr('width', (width + margin))
+                .append('g')
+                .attr('class', 'chart');
+
+    d3.select('.chart')
+      .selectAll('circle')
+      .data(data)
+      .enter()
+      .append('circle');
+
+    //set the scales
+
+    var x_extent = d3.extent(data, function(d) {
+      return d['volume'];
+    });
+    var y_extent = d3.extent(data, function(d) {
+      return d['price'];
+    });
+
+    var x_scale = d3.scaleLinear()
+                    .domain(x_extent)
+                    .range([margin,width]);
+    var y_scale = d3.scaleLog()
+                    .domain(y_extent)
+                    .range([height,margin]);
+
+    //draw scales
+
+    var x_axis = d3.axisBottom().scale(x_scale).ticks(d3.count);
+    var y_axis = d3.axisLeft().scale(y_scale).ticks(d3.count);
+
+    d3.select('.chart')
+      .append('g')
+      .attr('class', 'x axis')
+      .attr('transform','translate(0,' + (height-1) + ')')
+      .call(x_axis);
+
+    d3.select('.chart')
+      .append('g')
+      .attr('class', 'y axis')
+      .attr('transform','translate(' + margin + ',0)')
+      .call(y_axis);
+
+    d3.selectAll('circle')
+      .attr('cx', function(d){
+        return x_scale(d['volume']);
+      })
+      .attr('cy', function(d) {
+        return y_scale(d['price']);
+      })
+      .attr('r', radius)
+      .attr('fill', function(d) {
+        switch (d['clarity']) {
+          case 'SI2':
+          return 'rgb(27, 158, 119)';
+          break;
+          case 'SI1':
+          return 'rgb(217, 95, 2)';
+          break;
+          case 'VS1':
+          return 'rgb(117, 112, 179)';
+          break;
+          case 'VS2':
+          return 'rgb(231, 41, 138)';
+          break;
+          case 'VVS2':
+          return 'rgb(102, 166, 30)';
+          break;
+          case 'VVS1':
+          return 'rgb(230, 171, 2)';
+          break;
+          case 'I1':
+          return 'rgb(166, 118, 29)';
+          break;
+          case 'IF':
+          return 'rgb(102, 102, 102)';
+          break;
+          default: return 'black'
+
+        };
+      });
+
+
+
+
+  };
+  </script>
+</head>
+<body>
+  <script type="text/javascript">
+  d3.csv('diamonds.csv',function(d){
+    d['volume'] = +d['volume'];
+    d['price'] = +d['price'];
+    return d;
+  },draw);
+  </script>
+</body>
+</html>
